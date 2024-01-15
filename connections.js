@@ -62,40 +62,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    function handleTileClick(event) { // allows for tile to be clicked on
+    function handleTileClick(event) {
         if (event.target.classList.contains('tile') && !event.target.classList.contains('tile--matched')) { //tile will click on but will not match
-        const tileIndex = event.target.getAttribute('data-index'); 
-            if (event.target.classList.contains('tile--active')) { // shows tile is active
-                event.target.classList.remove('tile--active'); // deselects tile
-                activeTiles = activeTiles.filter(index => index !== tileIndex);
-            } else if (activeTiles.length < 4) { // only allows 4 tiles to be clicked on
-                event.target.classList.add('tile--active'); 
-                activeTiles.push(tileIndex); 
+            const tileIndex = event.target.getAttribute('data-index');
+    
+            // allow for tiles to be active only if they are not already active and there are less than 4 active tiles
+            if (!event.target.classList.contains('tile--active') && activeTiles.length < 4) {
+                event.target.classList.add('tile--active');
+                activeTiles.push(tileIndex);
             }
     
+            // Check for a match only when 4 tiles are active
             if (activeTiles.length === 4) {
                 checkForMatch();
+                // Tiles will be active unless they are matched
             }
-
-       } else if (activeTiles.length === 4) {
-           activeTiles.forEach(tile => {
-               document.querySelector(`.tile[data-index="${tile}"]`).classList.remove('tile--active');
-           });
-           activeTiles = [];
-       }
+        }
     }
+    
+    
 
-    function updateScore() { // updates score user matches tiles
+    function updateScore() { // updates scores show the user that the matches tiles
         scoreBoard.innerText = `Score: ${score}`;
     }
     
     document.getElementById('play-button').addEventListener('click', function() { 
         const gameBoard = document.getElementById('game-board'); // 
     
-        // 
+        // slide out the play button 
         this.style.animation = 'slideOut 0.5s forwards'; // This action is refer to play button
     
-        // After the menu slides out, display the game board
+        // After the menu slides out, it display the game board
         setTimeout(() => {
             this.style.display = 'none'; // This allows to hide the play button
             gameBoard.style.display = 'flex'; 
