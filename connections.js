@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         score = 0;  
         updateScore(); 
         activeTiles = []; 
+
+        document.getElementById('game-board').style.display = 'flex';
     }
 
     function checkForMatch() { 
@@ -86,9 +88,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateScore() { // updates score user matches tiles
         scoreBoard.innerText = `Score: ${score}`;
     }
-
+    
+    document.getElementById('play-button').addEventListener('click', function() { 
+        const gameBoard = document.getElementById('game-board'); // 
+    
+        // 
+        this.style.animation = 'slideOut 0.5s forwards'; // This action is refer to play button
+    
+        // After the menu slides out, display the game board
+        setTimeout(() => {
+            this.style.display = 'none'; // This allows to hide the play button
+            gameBoard.style.display = 'flex'; 
+            gameBoard.style.animation = 'slideIn 0.5s forwards'; // this action is refer to game board
+            initGame(); // begins the game after play button is clicked
+        }, 500); // Time when the boxes appears 
+    });
+    
+    
     document.getElementById('submit-button').addEventListener('click', initGame);
     gameBoard.addEventListener('click', handleTileClick);
 
-    initGame();
 });
