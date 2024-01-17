@@ -20,20 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
-    
 
+    // This is the list of categories and words that will be used in the game
+    const categories = {
+        "Topic of Discussion": ["ISSUE", "MATTER", "POINT", "SUBJECT"],
+        "Section of One's Life": ["CHAPTER", "PERIOD", "PHASE", "STAGE"],
+        "Part of a Car, Informally": ["DASH", "SHOCK", "TANK", "WHEEL"],
+        "Color Homophones": ["BLEW", "CHORAL", "READ", "ROWS"]
+    };
+
+    // This is where content is saved to the tiles
     function assignTileContent() {
-        const tileContents = [];
-        for (let i = 0; i < 8; i++) {
-            tileContents.push(i, i);
-        }
-        tileContents.sort(() => Math.random() - 0.5);
-        const tiles = document.querySelectorAll('.tile');
-        tiles.forEach((tile, index) => {
-            tile.setAttribute('data-content', tileContents[index]);
-        });
+    let tileContents = [];
+    for (const category in categories) {
+        tileContents = tileContents.concat(categories[category]);
     }
+    tileContents.sort(() => Math.random() - 0.5);
+
+    const tiles = document.querySelectorAll('.tile');
+    tiles.forEach((tile, index) => {
+        tile.innerText = tileContents[index]; // Display the word on the tile
+        tile.setAttribute('data-content', tileContents[index]);
+    });
+}
+
 
 
     function initGame() { //
@@ -46,39 +56,57 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('game-board').style.display = 'flex';
     }
 
-    function checkForMatch() { 
-        if (activeTiles.length === 4) {
-            const tiles = activeTiles.map(tile => document.querySelector(`.tile[data-index="${tile}"]`));
-            const allMatch = tiles.every(tile => tile.getAttribute('data-content') === tiles[0].getAttribute('data-content'));
+    //
+    function checkForMatch() {
+        const selectedTiles = activeTiles.map(tileIndex => 
+            document.querySelector(`.tile[data-index="${tileIndex}"]`));
     
-            if (allMatch) {
-                score += 10; 
-                updateScore();
-                tiles.forEach(tile => tile.classList.add('tile--matched'));
-                activeTiles = []; 
-            }
-           
+        // Get the word categories of the selected tiles
+        const selectedCategories = selectedTiles.map(tile => 
+            Object.keys(categories).find(category => 
+                categories[category]. includes(tile.getAttribute('data-content'))
+            )
+        );
+        
+        // checks if words are from the same category
+        const allMatch = selectedCategories.every(category => 
+            category === selectedCategories[0]);
+    
+        if (allMatch) {
+            score += 10;
+            updateScore();
+            selectedTiles.forEach(tile => { // Add matched class to matched tiles
+                tile.classList.add('tile--matched');
+                tile.classList.remove('tile--active'); // Remove active class on matched tiles
+            });
+            activeTiles = []; // Clear the activeTiles array
+        } else {
+            alert("Incorrect match. Try again!");
+            // Do not reset active tiles here. Let the user deselect manually
         }
     }
     
-
-    function handleTileClick(event) {
-        if (event.target.classList.contains('tile') && !event.target.classList.contains('tile--matched')) { //tile will click on but will not match
-            const tileIndex = event.target.getAttribute('data-index');
     
-            // allow for tiles to be active only if they are not already active and there are less than 4 active tiles
-            if (!event.target.classList.contains('tile--active') && activeTiles.length < 4) {
+    // Remodified the handletileclick function to allow the user to deselect tiles
+    function handleTileClick(event) {
+        if (event.target.classList.contains('tile') && !event.target.classList.contains('tile--matched')) {
+            const tileIndex = parseInt(event.target.getAttribute('data-index'), 10);
+            
+            // If the tile is already active, remove the active class and remove the tile index from the activeTiles array
+            if (event.target.classList.contains('tile--active')) {
+                event.target.classList.remove('tile--active');
+                const indexToRemove = activeTiles.indexOf(tileIndex);
+                if (indexToRemove !== -1) { //
+                    activeTiles.splice(indexToRemove, 1); 
+                }
+            } else if (activeTiles.length < 4) { 
                 event.target.classList.add('tile--active');
                 activeTiles.push(tileIndex);
             }
-    
-            // Check for a match only when 4 tiles are active
-            if (activeTiles.length === 4) {
-                checkForMatch();
-                // Tiles will be active unless they are matched
-            }
+            // also remove the automatic checkForMatch() call
         }
     }
+    
     
     
 
@@ -101,8 +129,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500); // Time when the boxes appears 
     });
     
-    
-    document.getElementById('submit-button').addEventListener('click', initGame);
-    gameBoard.addEventListener('click', handleTileClick);
+    // This is the submit button
+    document.getElementById('submit-button').addEventListener('click', function() {
+        if (activeTiles.length > 0) {
+        checkForMatch();
+        } else {
+        alert("Please select some tiles before submitting.");
+        }
+        });
+
+     gameBoard.addEventListener('click', handleTileClick);
+
 
 });
