@@ -5,8 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeTiles = [];
 
 
-    // fuction where allows the user to see the message box with timer set to 5 seconds
-    function showMessageBox(message) {
+    function showMessageBox(message) { // This notifies the user does't have the correct answer
         const messageBox = document.getElementById('message-box');
         messageBox.innerText = message;
         messageBox.style.display = 'block';
@@ -16,16 +15,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // This function allows user to deselect boxes that are selected
-    function deselectTiles() {
+    function showMessageBox2(message) { // this is where help box is displayed
+        const messageBox = document.getElementById('message-box2');
+        const messageContentBox = messageBox.querySelector('.message-content-box');
+    
+        messageContentBox.querySelector('.message-content').innerText = message;
+        messageBox.style.display = 'flex'; // displays the box
+    
+        setTimeout(() => {
+            messageBox.style.opacity = 1;
+            messageContentBox.style.opacity = 1;
+            messageContentBox.style.transform = 'translateY(0)';
+        }, 10); 
+    }
+
+    function closeMessageBox() { // This allows user to close the message box
+        const messageBox = document.getElementById('message-box2');
+        const messageContentBox = messageBox.querySelector('.message-content-box');
+    
+        messageBox.style.opacity = 0;
+        messageContentBox.style.opacity = 0;
+        messageContentBox.style.transform = 'translateY(20%)';
+    
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 500); 
+    }
+    
+    function deselectTiles() { // This function allows user to deselect boxes that are selected
         document.querySelectorAll('.tile--active').forEach(tile => {
             tile.classList.remove('tile--active');
         });
         activeTiles.length = 0; // Correctly reset the global activeTiles array
+        document.getElementById('submit-button').disabled = activeTiles.length !== 4;
     }
     
-    // This function allows the user to shuffle the tiles
-    function shuffleTiles() {
+    function shuffleTiles() { // This function allows the user to shuffle the tiles
         const tiles = Array.from(document.querySelectorAll('.tile'));
         let contents = tiles.map(tile => tile.getAttribute('data-content'));
         let activeContents = activeTiles.map(index => tiles[index].getAttribute('data-content'));
@@ -52,10 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 tile.classList.remove('tile--active');
             }
         });
+        document.getElementById('submit-button').disabled = activeTiles.length !== 4;
     }
 
-    function createTiles() {
-        for (let i = 0; i < 4; i++) { // For each row
+    function createTiles() { // This is where the tiles are created
+        for (let i = 0; i < 4; i++) { // For each row of tiles 
             let row = document.getElementById(`row-${i}`);
             row.innerHTML = ''; 
     
@@ -78,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Color Homophones": ["BLEW", "CHORAL", "READ", "ROWS"]
     };
 
-    // This is where content is saved to the tiles
-    function assignTileContent() {
+   
+    function assignTileContent() {  // This is where content is saved to the tiles
     let tileContents = [];
     for (const category in categories) {
         tileContents = tileContents.concat(categories[category]);
@@ -97,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initGame() { // starts the game
         createTiles();
-        assignTileContent(); // allows for random tile content
+        assignTileContent(); 
         score = 0;  
         updateScore(); 
         activeTiles = []; 
@@ -105,13 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('game-board').style.display = 'flex';
     }
 
-    //
-    function checkForMatch() {
+    function checkForMatch() { // This is where the tiles are checked for matches
         const selectedTiles = activeTiles.map(tileIndex => 
             document.querySelector(`.tile[data-index="${tileIndex}"]`));
     
-        // Get the word categories of the selected tiles
-        const selectedCategories = selectedTiles.map(tile => 
+        const selectedCategories = selectedTiles.map(tile =>  // Get the word categories of the selected tiles
             Object.keys(categories).find(category => 
                 categories[category]. includes(tile.getAttribute('data-content'))
             )
@@ -120,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // checks if words are from the same category
         const allMatch = selectedCategories.every(category => 
             category === selectedCategories[0]);
-    
+
         if (allMatch) {
             score += 10;
             updateScore();
@@ -154,42 +178,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeTiles.push(tileIndex);
                 }
             }
+
+            document.getElementById('submit-button').disabled = activeTiles.length !== 4;
             // also remove the automatic checkForMatch() call
         }
     }
-
-    
-    document.getElementById('message-box').addEventListener('click', function() {
-        this.style.display = 'none';
-    });
     
     function updateScore() { // updates scores show the user that the matches tiles
         scoreBoard.innerText = `Score: ${score}`;
     }
     
     document.getElementById('play-button').addEventListener('click', function() { 
-        const gameBoard = document.getElementById('game-board');
-        // slide out the play button 
-        this.style.animation = 'slideOut 0.5s forwards'; // This action is refer to play button
-    
-        // After the menu slides out, it display the game board
+        // Slide out the play button animation
+        this.style.animation = 'slideOut 0.9s forwards';
         setTimeout(() => {
-            this.style.display = 'none'; // This allows to hide the play button
-            gameBoard.style.display = 'flex'; 
-            gameBoard.style.animation = 'slideIn 0.5s forwards'; // this action is refer to game board
-
-            // loads once the grid is fully displayed
+            // Hide the play button after animation
+            this.style.display = 'none';
+            document.getElementById('hiding-this').style.display = 'none';
+            // Display the game board
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.style.display = 'flex';
+            gameBoard.classList.add('fade-in-animation');
+            // Show other buttons with a slight delay
             setTimeout(() => {
-            document.getElementById('shuffle-button').style.display = 'inline-block'; // This allows the shuffle button to appear
-            document.getElementById('deselect-button').style.display = 'inline-block'; // This allows the deselection button to appear
-            document.getElementById('submit-button').style.display = 'inline-block'; // This allows the submit button to appear
-            }, 500);
-
-            initGame(); // begins the game after play button is clicked
-        }, 500); // Time when the boxes appears 
+                document.getElementById('shuffle-button').style.display = 'inline-block';
+                document.getElementById('deselect-button').style.display = 'inline-block';
+                document.getElementById('submit-button').style.display = 'inline-block';
+                document.getElementById('help-button').style.display = 'inline-block';
+                document.getElementById('line').style.display = 'inline-block';
+                document.getElementById('feedback-button').style.display = 'inline-block';
+            }, 410); // Delay for the game board to appear
+            // Initialize the game
+            initGame();
+        }, 500); // Duration of the slideOut animation
     });
     
+    
+    
     // This is the submit button
+    document.getElementById('submit-button').disabled = true; // Disable the submit to make sure the user selects 4 tiles
     document.getElementById('submit-button').addEventListener('click', function() {
         if (activeTiles.length > 0) {
         checkForMatch();}    
@@ -197,7 +224,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('deselect-button').addEventListener('click', deselectTiles); // This is the deselect button
     document.getElementById('shuffle-button').addEventListener('click', shuffleTiles); // This is the shuffle button
-  
+
+
+    document.getElementById('help-button').addEventListener('click', function() { // This is the help button
+        showMessageBox2('Select 4 words that are related to each other. Click Submit to check your answer.');
+    document.getElementById('message-box2').addEventListener('click', closeMessageBox);
+    })
+    document.getElementById('message-box').addEventListener('click', function() { // Message box
+        this.style.display = 'none';
+    });
+
     gameBoard.addEventListener('click', handleTileClick);
 
 
