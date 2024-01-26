@@ -227,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             assignTileContent();
             // reset the submit button
             almostMatchedGroup = null;
+            activeTiles.length = 0; // correctly reset the global activeTiles array
         } else {
             // check if the selected tiles match any of the groups except for one word
             almostMatchedGroup = connection_words.find(group => 
@@ -243,8 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessageBox('Try again, those words do not match.');
             }
         }
-    
-        activeTiles.length = 0;
+        // move the activeTiles.length above 
         document.getElementById('submit-button').disabled = true;
     }
     
@@ -279,32 +279,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // remodified the handletileclick function to allow the user to deselect tiles and select tiles
     function handleTileClick(event) {
-        // trigger the click event on the tile if the user clicks on the tile's content
         const clickedTile = event.target;
-    
-        // Exit if the clicked element is not a tile
         if (!clickedTile.classList.contains('tile')) {
-            return; 
+            return;
         }
-        
-        // leave the tile selected if it is already selected
+    
         const isTileActive = clickedTile.classList.contains('tile--active');
-        // get the tile data-index
         const tileIndex = parseInt(clickedTile.getAttribute('data-index'), 10);
     
-        // Allow tile toggle if less than 4 tiles are active or if correcting an "almost match"
-        if (isTileActive || activeTiles.length < 4 || almostMatchedGroup) {
-            // toggle the active class on the tile
-            clickedTile.classList.toggle('tile--active');
-            // update the activeTiles array
-            if (isTileActive) { 
-                // remove the tile index from the activeTiles array
-                activeTiles = activeTiles.filter(index => index !== tileIndex);
-            } else {
-                activeTiles.push(tileIndex);
-            }
+        // allows the active state of the tile regardless of the almostMatchedGroup
+        if (isTileActive) {
+            // tile is active it can be deselected
+            clickedTile.classList.remove('tile--active');
+            activeTiles = activeTiles.filter(index => index !== tileIndex);
+        } else if (!isTileActive && activeTiles.length < 4) {
+            // tile is not active less than 4 tiles are active, activate it
+            clickedTile.classList.add('tile--active');
+            activeTiles.push(tileIndex);
         }
     
+        // the submit button should be enabled only when exactly 4 tiles are active
         document.getElementById('submit-button').disabled = activeTiles.length !== 4;
         event.stopPropagation();
     }
