@@ -1,6 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
+    /* -webkit-user-select: none; */
 
 }
 
@@ -220,3 +221,28 @@ hr {
     animation-fill-mode: forwards;
 }
 
+.color-easy { background-color: green; }
+.color-normal { background-color: blue; }
+.color-hard { background-color: orange; }
+.color-tricky { background-color: red; }
+/* Additional styles for the banner */
+.answer-banner {
+    /* styles for the banner */ 
+
+}
+
+.no-select {
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}
+
+.non-interactive-element {
+    pointer-events: none;
+}
+
+
+
+    
+    
