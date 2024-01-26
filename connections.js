@@ -313,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreBoard.innerText = `Score: ${score}`;
     }
     
+    
     document.getElementById('play-button').addEventListener('click', function() { 
         // slide out the play button animation
         this.style.animation = 'slideOut 0.9s forwards';
