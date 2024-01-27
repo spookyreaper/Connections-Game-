@@ -6,8 +6,8 @@ Connections Game is an online game that guides you to find groups of four words 
 
 ## Technologies Used
 
-- HTML5
-- CSS3
+- HTML
+- CSS
 - JavaScript
 
 ## Steps Taken
