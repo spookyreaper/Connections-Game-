@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let matchedWords = []; // this is where the matched words are stored
     let nextRowToReplace = 0; // this `nextRowToReplace` variable will be used to determine which row to replace next
     let almostMatchedGroup = null; // add this at the beginning of your script
+    let triesLeft = 4; // this is where the tries left are stored
 
 
     function showMessageBox(message) { // this notifies the user does't have the correct answer
@@ -18,11 +19,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    function showMessageBox2(message) { // this is where help box is displayed
+    function showMessageBox2() { // this is where help box is displayed
         const messageBox = document.getElementById('message-box2');
         const messageContentBox = messageBox.querySelector('.message-content-box');
     
-        messageContentBox.querySelector('.message-content').innerText = message;
+        // contains the HTML content of the message box
+        const helpContentHTML = `
+            <h2>How to play Connections</h2>
+            <p>Find groups of four items that share something in common.</p>
+            <ul>
+                <li>Select four items and tap 'Submit' to check if your guess is correct.</li>
+                <li>Find the groups without making 4 mistakes!</li>
+            </ul>
+            <h3>Category Examples</h3>
+            <p id="examples">Bank: Coins, Teller, Valut, Checks</p>
+            <p id="examples">Tom ___: Curise, Hanks, Bradly, Holland</p>
+            <p id="examples">Categories will always be more specific than "5-LETTER WORDS," "NAMES" or "VERBS."</p>
+            <p id="examples">Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!</p>
+            <p id="examples">Each group is assigned a color, which will be revealed as you solve:</p>
+            <div class="color-explanation">
+                <span class="color-box easy"></span> Easy
+                <span class="color-box moderate"></span> Moderate
+                <span class="color-box hard"></span> Hard
+                <span class="color-box tricky"></span> Tricky
+            </div>
+            <p id="examples">Have general feedback? <a href="#">Let us know!</a></p>
+        `;
+    
+        // set the content of the message box
+        messageContentBox.innerHTML = helpContentHTML;
         messageBox.style.display = 'flex'; // displays the box
     
         setTimeout(() => {
@@ -31,7 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             messageContentBox.style.opacity = 1;
             messageContentBox.style.transform = 'translateY(0)';
         }, 10); 
+
     }
+    
 
     function closeMessageBox() { // this allows user to close the message box
         const messageBox = document.getElementById('message-box2');
@@ -97,6 +124,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('submit-button').disabled = activeTiles.length !== 4;
     }
     
+    function mistakesLeft() { // this function allows the user to see how many mistakes they have left
+        triesLeft -= 1;
+        updateTriesDisplay();
+        if (triesLeft === 0) {
+            solveWords();
+        }
+    }
+
+    function updateTriesDisplay() { // updates the number of tries left
+        const triesDisplay = document.getElementById('tries-left');
+        // displays the Mistakes left text
+        let displayContent = '<span class="mistakes-text">Mistakes left:</span> ';
+        for (let i = 0; i < triesLeft; i++) {
+            // displays the skull icon
+            displayContent += '<i class="fa-solid fa-skull-crossbones skull-icon"></i>';
+        }
+        triesDisplay.innerHTML = displayContent;
+    }
     
     
     
@@ -191,18 +236,20 @@ document.addEventListener('DOMContentLoaded', () => {
         assignTileContent(); 
         score = 0;  
         updateScore(); 
-        activeTiles = []; 
+        activeTiles = [];
+        triesLeft = 4;
+        updateTriesDisplay(); /// updates the tries left
 
         document.getElementById('game-board').style.display = 'flex';
     }
 
     function checkForMatch() { // this function checks if the user has the correct answer
-        // get the selected tiles
+            // get the selected tiles
         const selectedTiles = activeTiles.map(tileIndex => 
             // get the tile element from the tile index
             document.querySelector(`.tile[data-index="${tileIndex}"]`));
 
-        // check if the selected tiles match any of the groups
+            // check if the selected tiles match any of the groups
         const matchedGroup = connection_words.find(group => 
             // check if the selected tiles match the group's words
             selectedTiles.every(tile => group.words.includes(tile.getAttribute('data-content')))
@@ -229,19 +276,26 @@ document.addEventListener('DOMContentLoaded', () => {
             almostMatchedGroup = null;
             activeTiles.length = 0; // correctly reset the global activeTiles array
         } else {
-            // check if the selected tiles match any of the groups except for one word
-            almostMatchedGroup = connection_words.find(group => 
-                // check if the selected tiles match the group's words except for one word
-                selectedTiles.filter(tile => group.words.includes(tile.getAttribute('data-content'))).length === 3
-            );
+                mistakesLeft(); // update the tries left
+                if (triesLeft <= 0) {
+                    // if no mistakes left, it's game over
+                    showMessageBox('Better luck next time!');
+                    solveWords();
+                } else {
+                // check if the selected tiles match any of the groups except for one word
+                almostMatchedGroup = connection_words.find(group => 
+                    // check if the selected tiles match the group's words except for one word
+                    selectedTiles.filter(tile => group.words.includes(tile.getAttribute('data-content'))).length === 3
+                );
 
-            // if the selected tiles match a group except for one word, display the banner
-            if (almostMatchedGroup && selectedTiles.length === 4) {
-                showMessageBox('You are missing one!');
-                // do not reset the tiles
-                return;
-            } else {
-                showMessageBox('Try again, those words do not match.');
+                // if the selected tiles match a group except for one word, display the banner
+                if (almostMatchedGroup && selectedTiles.length === 4) {
+                    showMessageBox('You are missing one!');
+                    // do not reset the tiles
+                    return;
+                } else {
+                    showMessageBox('Try again, those words do not match.');
+                }
             }
         }
         // move the activeTiles.length above 
@@ -254,18 +308,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayBanner(category, difficulty, rowToReplace, wordsToDisplay) {
         // create the banner element
         const bannerColor = getDifficultyColor(difficulty);
+        // create the banner element
         const banner = document.createElement('div');
-        //
+        // add the classes to the banner
         banner.className = `answer-banner ${bannerColor}`;
         // add the banner content
         banner.innerHTML = `<p>${category}<br>${wordsToDisplay.join(', ')}</p>`;
     
-        // this replaces the row with the banner
-        rowToReplace.innerHTML = '';
-        // this adds the banner to the row
-        rowToReplace.appendChild(banner);
-    }
+        rowToReplace.innerHTML = ''; // clear the row
+        rowToReplace.appendChild(banner); 
     
+        // plays the animation
+        banner.classList.add('banner-appear-animation');
+    }
     
     function resetTiles() { // tiles are reset
         document.querySelectorAll('.tile--active').forEach(tile => {
@@ -276,14 +331,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    
     // remodified the handletileclick function to allow the user to deselect tiles and select tiles
     function handleTileClick(event) {
+        // trigger the click event only when the user clicks on a tile
         const clickedTile = event.target;
         if (!clickedTile.classList.contains('tile')) {
             return;
         }
-    
+        
+        // checks if the clicked tile is already active
         const isTileActive = clickedTile.classList.contains('tile--active');
         const tileIndex = parseInt(clickedTile.getAttribute('data-index'), 10);
     
@@ -326,13 +382,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('submit-button').style.display = 'inline-block';
                 document.getElementById('help-button').style.display = 'inline-block';
                 document.getElementById('line').style.display = 'inline-block';
-                document.getElementById('feedback-button').style.display = 'inline-block';
+                document.getElementById('score-display').style.display = 'inline-block';
             }, 410); // delay for the game board to appear
             // initialize the game
             initGame();
         }, 500); // duration of the slideOut animation
     });
     
+    function solveWords() {
+        connection_words.forEach(group => {
+            // tries to find a group that has not been matched yet
+            if (!group.words.every(word => matchedWords.includes(word))) {
+                // display the banner for this group
+                if (nextRowToReplace < 4) {
+                    const rowToReplace = document.getElementById(`row-${nextRowToReplace}`);
+                    displayBanner(group.category, group.difficulty, rowToReplace, group.words);
+                    nextRowToReplace++;
+                }
+    
+                // add the group's words to the matchedWords array
+                matchedWords.push(...group.words);
+            }
+        });
+    
+        document.getElementById('submit-button').disabled = true;
+    
+    }
     
     
     // this is the submit button
@@ -345,11 +420,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('deselect-button').addEventListener('click', deselectTiles); // this is the deselect button
     document.getElementById('shuffle-button').addEventListener('click', shuffleTiles); // this is the shuffle button
 
-
-    document.getElementById('help-button').addEventListener('click', function() { // this is the help button
-        showMessageBox2('Select 4 words that are related to each other. Click Submit to check your answer.');
+    document.getElementById('help-button').addEventListener('click', function() {
+        showMessageBox2(); // Call the function without arguments
+        // Remove the event listener for closing the message box after it's been added once to avoid multiple bindings
+    });
+    // This should be outside of your 'help-button' click event listener
     document.getElementById('message-box2').addEventListener('click', closeMessageBox);
-    })
+
     document.getElementById('message-box').addEventListener('click', function() { // Message box
         this.style.display = 'none';
     });

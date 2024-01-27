@@ -1,7 +1,10 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    /* -webkit-user-select: none; */
+    background-image: url('5368082.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+
 
 }
 
@@ -9,6 +12,16 @@ hr {
     border: 1px solid #333;
     width: 100%;
     margin: 100px auto;
+}
+
+h1{
+    background-color: lightgray;
+    padding: 10px;
+    width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 3px solid black;
+    border-radius: 10px;
 }
 
 
@@ -38,7 +51,7 @@ hr {
 .tile {
     min-width: 150px; 
     min-height: 70px;
-    border: 1px solid #333;
+    border: 2px solid #333;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -67,7 +80,7 @@ hr {
     top: 50%;      
     left: 50%;     
     transform: translate(-50%, -50%); 
-    z-index: 1000; /* to make sure it is on top of everything else */
+    z-index: 1000; /* to make it first */
     color: yellow; 
     background-color: rgba(0, 0, 0, 0.6); 
     padding: 10px;
@@ -82,17 +95,17 @@ hr {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Dimmed backdrop */
+    background-color: rgba(0, 0, 0, 0.5); /* turned down backdrop */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 999;
 }
 
-.message-content-box {
+.message-content-box {  /* this controls messageBox2 */
     padding: 20px;
     width: 500px;
-    height: 100px;
+    height: 500px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
@@ -127,15 +140,37 @@ hr {
     margin-bottom: 10px;
 }
 
+.mistakes-text {
+    color: black;
+    background-color: lightgray;
+    border: 2px solid black;
+    border-radius: 10px;
+    width: 110px;
+    margin-top: -3px;
+}
+
 #score-display {
     font-size: 24px;
     margin-bottom: 20px;
+    background-color: lightgray;
+    border: 2px solid black;
+    border-radius: 10px;
+    width: 120px;
     
 }
 
 #hiding-this {
+    margin-top: 70px;
+    margin-bottom: 20px;
+    background-color: lightgray;
+    color: black;
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+    height: 30px;
     font-size: 25px;
-    
+    border: 2px solid black;
+    border-radius: 10px;
 }
 
 
@@ -169,7 +204,6 @@ hr {
 }
 
 #help-button {
-    display: none;
     border-radius: 50px;
     background-color: white;
     border: 1px  grey;
@@ -192,11 +226,11 @@ hr {
 
 @keyframes slideUp { /* this is the animation for the message box */
     from {
-        transform: translateY(20%);
+        transform: translateY(50%);
         opacity: 0;
     }
     to {
-        transform: translateY(5%);
+        transform: translateY(1%);
         opacity: 1;
     }
 }
@@ -222,12 +256,13 @@ hr {
 }
 
 .color-easy { background-color: green; }
-.color-normal { background-color: blue; }
+.color-normal { background-color: yellow; }
 .color-hard { background-color: orange; }
 .color-tricky { background-color: red; }
-/* Additional styles for the banner */
+
 .answer-banner {
-    /* styles for the banner */ 
+    width: 90%;
+    border-radius: 15px;
 
 }
 
@@ -242,7 +277,99 @@ hr {
     pointer-events: none;
 }
 
+.try-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #555;
+    margin: 0 5px;
+}
+
+.tries-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+    
+@keyframes bannerAppear {
+    from {
+        transform: scaleY(0);
+        opacity: 0;
+    }
+    to {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+.banner-appear-animation {
+    animation: bannerAppear 0.5s ease forwards;
+}
+
+.skull-icon {
+    color: red;
+    padding-right: 2px;
+    margin-left: 5px;
+}
 
 
-    
-    
+/* messageBox Content*/
+
+.color-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.color-box.easy {
+    background-color: green; 
+}
+
+.color-box.moderate {
+    background-color: yellow ; 
+}
+
+.color-box.hard {
+    background-color: orange;
+}
+
+.color-box.tricky {
+    background-color: red; 
+}
+
+
+
+/* grouping all together*/
+.message-content-box h2,
+.message-content-box h3,
+.message-content-box p,
+.message-content-box ul { 
+    text-align: left;
+
+}
+
+.message-content-box p {
+    font-weight: bold;
+
+} 
+.message-content-box ul {
+    list-style: inside;
+    margin-left: -30px;
+    text-indent: -5px;
+    line-height: 25px;
+}
+
+#examples { /* this is the id of the ul in the message box */
+    font-weight: normal;
+}
+
+.message-content-box a {
+    color: blue;
+    text-decoration: none;
+}
+
+.message-content-box a:hover {
+    text-decoration: underline;
+}
+

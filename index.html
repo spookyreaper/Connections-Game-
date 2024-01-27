@@ -12,7 +12,7 @@
         <header>
             <h1>Connection Game</h1>
             <div id="hiding-this">Group words that share a common thread.</div>
-            <div id="score-display">Score <span id="score">0</span></div>
+            <div id="score-display" style="display: none;"><span id="score">0</span></div>
         </header>
         <div id="menu"> <!--menu box-->
             <div id="menu-box">
@@ -50,13 +50,13 @@
             </div>
         </main>
         <footer>
+            <div id="tries-left" class="tries-container"></div>
             <div class="groups-button">
                 <button id="shuffle-button">Shuffle </button>
                 <button id="deselect-button">Deselect All</button>
                 <button id="submit-button">Submit</button>
             </div>
             <button id="help-button" class="fa-regular fa-circle-question"></button>
-            <button id="feedback-button" class="fa-regular fa-comment"></button>
         </footer>
         <hr id="line">
     </div>
