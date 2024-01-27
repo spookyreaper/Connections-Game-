@@ -12,7 +12,7 @@ Connections Game is an online game that guides you to find groups of four words 
 
 ## Steps Taken
 
-- I started defining the game mechanics in basic terms and working out the user flow, where it would be easy for a user to ‘drag’ one word to another to connect them and click buttons to submit answers.
+- I started defining the game mechanics in basic terms and working out the user flow, where it would be easy for a user to ‘click’ one word to another to connect them and click buttons to submit answers.
 
 - To make the game more responsive and user-friendly, I introduced a scoring system and feedback for correct and incorrect guesses. JavaScript arrays and DOM manipulation were used to handle the game logics and update status at runtime.
 
