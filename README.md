@@ -41,7 +41,7 @@ To run this game locally:
 
 ## Links 
 
-https://trello.com/invite/b/qi2sjQZK/ATTI82b6b88575514d55692c2f417879afc41EC9F5B9/connections
+As a user or MVP: https://trello.com/invite/b/qi2sjQZK/ATTI82b6b88575514d55692c2f417879afc41EC9F5B9/connections
 
 keyframe animation: https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes
 
