@@ -36,14 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <p id="examples">Tom ___: Curise, Hanks, Bradly, Holland</p>
             <p id="examples">Each groups is always going to be more detailed than "5-LETTER WORDS," "NAMES" or "VERBS."</p>
             <p id="examples">Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!</p>
-            <p id="examples">Each group is assigned a color, which will be revealed as you solve:</p>
+            <p id="examples">Each group of words you match will show you the difficulty as you solve:</p>
             <div class="color-explanation">
                 <span class="color-box easy"></span> Easy
                 <span class="color-box moderate"></span> Moderate
                 <span class="color-box hard"></span> Hard
                 <span class="color-box tricky"></span> Tricky
             </div>
-            <p id="examples">Have general feedback? <a href="#">Let us know!</a></p>
+            <p id="examples">Have general feedback? <a href="#">Tell us!</a></p>
         `;
     
         // set the content of the message box
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <button onclick="closeEndGameMessageBox()">Main Menu</button>
         `;
     
-        // Display the backdrop
+        // display the backdrop
         backdrop.style.display = 'flex';
     }
 
@@ -433,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('submit-button').disabled = true;
     
     }
-    
     
     // this is the submit button
     document.getElementById('submit-button').disabled = true; // disable the submit to make sure the user selects 4 tiles

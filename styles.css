@@ -291,7 +291,7 @@ h1{
     margin-top: 10px;
 }
     
-@keyframes bannerAppear {
+@keyframes bannerAppear { /* when the word banner */
     from {
         transform: scaleY(0);
         opacity: 0;
@@ -307,7 +307,7 @@ h1{
 }
 
 .skull-icon {
-    color: red;
+    color: firebrick;
     padding-right: 2px;
     margin-left: 5px;
 }
