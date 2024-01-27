@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <li>Select four items and tap 'Submit' to check if your guess is correct.</li>
                 <li>Find the groups without making 4 mistakes!</li>
             </ul>
-            <h3>Category Examples</h3>
+            <h3>Group Examples:</h3>
             <p id="examples">Bank: Coins, Teller, Valut, Checks</p>
             <p id="examples">Tom ___: Curise, Hanks, Bradly, Holland</p>
-            <p id="examples">Categories will always be more specific than "5-LETTER WORDS," "NAMES" or "VERBS."</p>
+            <p id="examples">Each groups is always going to be more detailed than "5-LETTER WORDS," "NAMES" or "VERBS."</p>
             <p id="examples">Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!</p>
             <p id="examples">Each group is assigned a color, which will be revealed as you solve:</p>
             <div class="color-explanation">
@@ -59,6 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
     
+    function showEndGameMessageBox(isSuccess) { // this is where the end game message box is displayed
+        const backdrop = document.getElementById('end-game-backdrop');
+        const messageBox = document.getElementById('end-game-message-box');
+    
+        // set the content of the message box
+        messageBox.innerHTML = `
+            <p>${isSuccess ? 'Good job! You matched all words.' : 'Better luck next time!'}</p>
+            ${isSuccess ? '<button onclick="nextPuzzle()">Next Puzzle</button>' : ''}
+            <button onclick="closeEndGameMessageBox()">Main Menu</button>
+        `;
+    
+        // Display the backdrop
+        backdrop.style.display = 'flex';
+    }
 
     function closeMessageBox() { // this allows user to close the message box
         const messageBox = document.getElementById('message-box2');
@@ -170,23 +184,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // this is where arrays of words are stored
     const connection_words = [
         {
-          category: "Topic of Discussion",
-          words: ["ISSUE", "MATTER", "POINT", "SUBJECT"],
+          category: "Bit of Magic",
+          words: ["CHARM", "CURSE", "HEX", "SPELL"],
           difficulty: 1,
         },
         {
-          category: "Section of One's Life",
-          words: ["CHAPTER", "PERIOD", "PHASE", "STAGE"],
+          category: "Found Around A Fireplace",
+          words: ["FLUE", "GRATE", "LOG", "POKER"],
           difficulty: 2,
         },
         {
-          category: "Part of a Car, Informally",
-          words: ["DASH", "SHOCK", "TANK", "WHEEL"],
+          category: "Things Seen At A Casino",
+          words: ["CARDS", "CHIPS", "DICE", "SLOTS"],
           difficulty: 3,
         },
         {
-          category: "Color Homophones",
-          words: ["BLEW", "CHORAL", "READ", "ROWS"],
+          category: "Ways To Prepare Cheese",
+          words: ["CRUMBLE", "MELT", "SHRED", "SLICE"],
           difficulty: 4,
         },
       ];
@@ -275,12 +289,23 @@ document.addEventListener('DOMContentLoaded', () => {
             // reset the submit button
             almostMatchedGroup = null;
             activeTiles.length = 0; // correctly reset the global activeTiles array
+
+            // check if all groups have been matched
+            const allMatched = connection_words.every(group => 
+                group.words.every(word => matchedWords.includes(word))
+            );
+    
+            if (allMatched) {
+                // All groups matched, show success end-game message
+                showEndGameMessageBox(true);
+            }
         } else {
                 mistakesLeft(); // update the tries left
                 if (triesLeft <= 0) {
                     // if no mistakes left, it's game over
                     showMessageBox('Better luck next time!');
                     solveWords();
+                    showEndGameMessageBox(false);
                 } else {
                 // check if the selected tiles match any of the groups except for one word
                 almostMatchedGroup = connection_words.find(group => 
