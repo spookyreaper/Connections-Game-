@@ -327,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('help-button').style.display = 'inline-block';
                 document.getElementById('line').style.display = 'inline-block';
                 document.getElementById('feedback-button').style.display = 'inline-block';
+                document.getElementById('score-display').style.display = 'inline-block';
             }, 410); // delay for the game board to appear
             // initialize the game
             initGame();
