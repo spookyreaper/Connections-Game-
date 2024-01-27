@@ -2,7 +2,7 @@
 
 ## Description
 
-Connections Game is an online game that guides you to find groups of four words that are related to one another. Your task is to score as many points as possible by identifying all the connections before your successful guesses accumulate to more than four mistakes. After each guess, a relatively color-coded banner creates and replaces the rows after each match; displaying difficulty in the banner allows players to know what difficulty they achieved.
+Connections Game is an online game that guides you to find groups of four words that are related to one another. Your task is to match words by identifying all the connections before you run out of tries. After each guess, a relatively color-coded banner creates and replaces the rows after each match; displaying difficulty in the banner allows players to know what difficulty they achieved.
 
 ## Technologies Used
 
