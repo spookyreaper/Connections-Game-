@@ -56,23 +56,23 @@ image: https://www.freepik.com/free-vector/linear-flat-abstract-lines-pattern_13
 
 Ensuring unique words within tiles after a match
 
-    - Challenge: One of the biggest challenges  during  development was ensuring that words in tiles do not repeat after a user is successfully assigned to a group.
-    It was very important to fix this issue  because repeating words can confuse players and disrupt the gaming experience.
+- Challenge: One of the biggest challenges  during  development was ensuring that words in tiles do not repeat after a user is successfully assigned to a group.
+It was very important to fix this issue  because repeating words can confuse players and disrupt the gaming experience.
 
-    - Solution: To resolve this issue, I implemented a filtering mechanism within the assignTileContent function.
-    This mechanism first collects all unmatched words from the connection_words array.
-    Before these words are assigned to  tiles, the function filters out all words that have already been matched and are present in the matchedWords array.
-    This approach ensures that only new words that don't match on the tiles appear, keeping the game challenging and exciting.
+- Solution: To resolve this issue, I implemented a filtering mechanism within the assignTileContent function.
+This mechanism first collects all unmatched words from the connection_words array.
+Before these words are assigned to  tiles, the function filters out all words that have already been matched and are present in the matchedWords array.
+This approach ensures that only new words that don't match on the tiles appear, keeping the game challenging and exciting.
 
 Creating a dynamic banner after user matches the words 
 
-    - Challenge: Another challenge is to design and implement a feature  that displays a banner that replaces a row on the game board when the user  matches a group of words. To improve the user experience, banners needed to be informative, display categories and appropriate words, and be visually appealing.
+- Challenge: Another challenge is to design and implement a feature  that displays a banner that replaces a row on the game board when the user  matches a group of words. To improve the user experience, banners needed to be informative, display categories and appropriate words, and be visually appealing.
 
-    - Solution: The solution was to create a displayBanner function that dynamically generates a banner element when called.
-    This function takes the category, difficulty level, target line, and  words to display as arguments.
-    Depending on the difficulty  of the matched group, the  background color of the banner changes, giving players instant visual feedback.
-    The function then replaces the contents of the specified row with this newly created banner.
-    To add an fine touch, CSS animations (Banner Appear Animation) are applied to smooth the transition of the banner  into view.
+- Solution: The solution was to create a displayBanner function that dynamically generates a banner element when called.
+This function takes the category, difficulty level, target line, and  words to display as arguments.
+ Depending on the difficulty  of the matched group, the  background color of the banner changes, giving players instant visual feedback.
+The function then replaces the contents of the specified row with this newly created banner.
+To add an fine touch, CSS animations (Banner Appear Animation) are applied to smooth the transition of the banner  into view.
 
 
 Although I managed to create everything on my wireframe,I know that there's room for improvement, like adding another puzzle or making it mobile-friendly.
