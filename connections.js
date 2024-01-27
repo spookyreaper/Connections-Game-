@@ -90,13 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function deselectTiles() { // this function allows user to deselect boxes that are selected
         document.querySelectorAll('.tile--active').forEach(tile => {
+            // deselect the tile the user clicked on
             tile.classList.remove('tile--active');
         });
         activeTiles.length = 0; // correctly reset the global activeTiles array
         document.getElementById('submit-button').disabled = activeTiles.length !== 4;
     }
     
-    function shuffleTiles() {
+    function shuffleTiles() { // this function allows the user to shuffle the tiles
         const tiles = Array.from(document.querySelectorAll('.tile'));
         let contents = tiles.map(tile => tile.getAttribute('data-content'));
     
@@ -216,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
    
-      function assignTileContent() {  
+      function assignTileContent() {  // this is where content is saved to the tiles
         // get all the words that have not been matched yet
         let tileContents = [];
         connection_words.forEach(group => {

@@ -78,7 +78,10 @@ To add an fine touch, CSS animations (Banner Appear Animation) are applied to sm
 Although I managed to create everything on my wireframe,I know that there's room for improvement, like adding another puzzle or making it mobile-friendly.
 
 
+## Bugs
 
+Main Menu button does not work
+Also user can't exit out of the message pop of the end of the Game
 
 ## Disclaimer
 
