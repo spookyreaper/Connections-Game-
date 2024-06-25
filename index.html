@@ -5,73 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connection Game</title>
     <link rel="stylesheet" href="styles.css">
-</head>
+    <script src="https://kit.fontawesome.com/ce45817bc3.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="game-base">
         <header>
-            <h1 class="bar">Connection Game</h1>
-            <div id="hiding-this">Group words that share a common thread.</div>
-            <div id="score-display" style="display: none;"><span id="score">0</span></div>
+            <h1>Connection Game</h1>
         </header>
-        <div id="menu"> <!--menu box-->
-            <div id="menu-box">
+        <div id="menu">
+            <p>Group words that share a common thread.</p>
             <button id="play-button">Play</button>
-            </div>
         </div>
-        <!-- message back for feedback -->
+        <div id="score-display" style="display: none;"><span id="score">Score: 0</span></div>
         <div id="message-box" style="display: none;"></div>
-        <div id="message-backdrop" style="display: none;"></div>
-        <!-- message box for end game -->
-        <div id="end-game-backdrop">
-            <div id="end-game-message-box">
-                <span id="end-game-message"></span>
-                <div>
-                    <button id="next-puzzle-button">Next Puzzle</button>
-                    <button id="main-menu-button">Main Menu</button>
-                </div>
-            </div>
-        </div> 
-        <!-- message box for help -->
         <div id="message-box2" style="display: none;">
             <div class="message-content-box">
-                <span class="message-content"></span>
                 <span class="close-btn" onclick="closeMessageBox2()">&times;</span>
             </div>
         </div>
-        <div id="answer-banner-container"></div>
-        <!-- main game board -->
         <main id="game-board" class="no-select" style="display: none;">
-            <!-- Row 1 -->
-            <div class="row" id="row-0">
-                <!-- Tiles will be created for Row 1 -->
-            </div>
-            <!-- Row 2 -->
-            <div class="row" id="row-1">
-                <!-- Tiles will be created for Row 2 -->
-            </div>
-            <!-- Row 3 -->
-            <div class="row" id="row-2">
-                <!-- Tiles will be created for Row 3 -->
-            </div>
-            <!-- Row 4 -->
-            <div class="row" id="row-3">
-                <!-- Tiles will be created for Row 4 -->
-            </div>
+            <div class="row" id="row-0"></div>
+            <div class="row" id="row-1"></div>
+            <div class="row" id="row-2"></div>
+            <div class="row" id="row-3"></div>
         </main>
         <footer>
             <div id="tries-left" class="tries-container"></div>
             <div class="groups-button">
-                <button id="shuffle-button">Shuffle </button>
+                <button id="shuffle-button">Shuffle</button>
                 <button id="deselect-button">Deselect All</button>
                 <button id="submit-button">Submit</button>
             </div>
             <button id="help-button" class="fa-regular fa-circle-question"></button>
         </footer>
-        <hr id="line">
+        <div id="end-game-backdrop">
+            <div id="end-game-message-box"></div>
+        </div>
     </div>
-    <script src="connections.js"></script> 
-    <!-- Font Awesome -->
-    <script src="https://kit.fontawesome.com/ce45817bc3.js" crossorigin="anonymous"></script>   
+    <script src="connections.js"></script>
 </body>
 </html>
