@@ -1,98 +1,97 @@
-# Connections-Game-
+# Connection Game
 
-## Description
+Find four hidden connections among sixteen words. Start with everyday categories or take on wordplay, double meanings, and spelling tricks in the harder levels.
 
-Connections Game is an online game that guides you to find groups of four words that are related to one another. Your task is to match words by identifying all the connections before you run out of tries. After each guess, a relatively color-coded banner creates and replaces the rows after each match; displaying difficulty in the banner allows players to know what difficulty they achieved.
+[Play online](https://spookyreaper.github.io/Connections-Game-/)
 
-## Technologies Used
+## Homepage
 
-- HTML
-- CSS
-- JavaScript
+![Connection Game homepage showing the difficulty picker, Play button, and colorful word-board preview](docs/images/homepage.png)
 
-## Steps Taken
+## How to play
 
-- I started defining the game mechanics in basic terms and working out the user flow, where it would be easy for a user to ‘click’ one word to another to connect them and click buttons to submit answers.
+1. Choose **Easy**, **Medium**, **Hard**, or **Expert**. Hard is selected by default.
+2. Click **Let's play** to get a random puzzle at that level. Play avoids the last puzzle you played at the same level.
+3. Select four words that share a connection, then click **Submit**.
+4. Find all four groups before making four mistakes.
 
-- To make the game more responsive and user-friendly, I introduced a scoring system and feedback for correct and incorrect guesses. JavaScript arrays and DOM manipulation were used to handle the game logics and update status at runtime.
+Correct guesses reveal a colored category banner. Wordplay groups also explain how the words connect. Incorrect guesses use one mistake and automatically deselect the tiles so you can try a new group. A **One away!** hint appears when three selected words belong to the same group.
 
-- One of the first things I developed was the help box feature, which offers players guidelines and instructions on how to play. I placed the help box within a modal-style overlay in order to make sure that this information doesn’t intrude the game context and that players can access it without leaving the game environment.
+Use **Shuffle** to rearrange the remaining words or **Deselect All** to clear your selection. Each solved group earns 10–40 points, for a maximum of 100 per puzzle.
 
-## Live Site Link
+After a win, **Next Puzzle** loads another board at the same level and resets your score and mistakes. After a loss, **Try Again** restarts that board. **Main Menu** lets you change difficulty or start another random puzzle.
 
-https://spookyreaper.github.io/Connections-Game-/
+## Difficulty levels
 
-## Installation Instructions
+The collection contains **89 puzzles and 1,285 distinct words**. Each board contains 16 different words, arranged into four groups.
 
-To run this game locally:
+| Level | Puzzles | Connections |
+| --- | ---: | --- |
+| Easy | 65 | Familiar categories and straightforward meanings |
+| Medium | 8 | Multiple meanings, shared phrases, and introductory wordplay |
+| Hard | 8 | Indirect phrase connections and misleading associations |
+| Expert | 8 | Hidden letter patterns, sound-alikes, and overlapping meanings |
 
-1. Clone the repository to your local machine.
-2. Open the `index.html` file in a web browser.
-3. Enjoy the game!
+Group colors show the relative difficulty of the four connections within a board.
 
-## Wireframes
+## Features
 
-![Photo_1](/WireFrames/wireFrame_1.jpeg)
+- Random starting boards without immediately repeating the last puzzle at that level.
+- Saved difficulty and a separate last-played puzzle for each level, when browser storage is available.
+- Explanations for wordplay connections after solving or revealing a group.
+- Phone and tablet layouts for portrait and landscape, with touch-sized controls.
+- Keyboard-accessible tiles and difficulty controls, visible focus indicators, and reduced-motion support.
+- Help and results dialogs that close with the close button, Escape, or a click outside the dialog.
+- No timer, accounts, external fonts, or runtime dependencies.
 
-![Photo_2](/WireFrames/wireFrame_2.jpeg)
+## Run locally
 
-![Photo_3](/WireFrames/wireFrame_3.jpeg)
+1. Clone or download this repository.
+2. Open `index.html` in a modern web browser.
+3. Choose a difficulty and play.
 
+No installation, build step, or development server is required. The game uses HTML, CSS, and plain JavaScript.
 
-## Links 
+## Validate the puzzles
 
-As a user or MVP: https://trello.com/invite/b/qi2sjQZK/ATTI82b6b88575514d55692c2f417879afc41EC9F5B9/connections
+With Node.js installed, run:
 
-keyframe animation: https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes
+```sh
+node --test tests/puzzles.test.js
+```
 
-Fade in animation: https://blog.hubspot.com/website/css-fade-in
+The checks validate the word count, distinct boards, complete four-word groups, valid word labels, and explained wordplay in the higher levels.
 
-fonts: https://fontawesome.com/
+## Project files
 
-image: https://www.freepik.com/free-vector/linear-flat-abstract-lines-pattern_13819726.htm#query=box%20pattern&position=1&from_view=keyword&track=ais&uuid=f08c94a5-9a6d-4e86-9055-b12e966ff607
+| File | Purpose |
+| --- | --- |
+| `index.html` | Homepage, difficulty picker, board, and dialogs |
+| `styles.css` | Visual design, responsive layouts, and interaction states |
+| `connections.js` | Selection, matching, scoring, random play, and saved preferences |
+| `puzzles.js` | 65 Easy puzzles |
+| `puzzles-medium.js` | 8 Medium puzzles |
+| `puzzles-hard.js` | 8 Hard and 8 Expert puzzles |
+| `tests/puzzles.test.js` | Puzzle-library validation |
+| `docs/images/homepage.png` | Screenshot of the current homepage |
 
+## Original wireframes
 
-## Challenges/Unsolved Problems
+<details>
+<summary>View the original design sketches</summary>
 
-Ensuring unique words within tiles after a match
+![Original wireframe 1](WireFrames/wireFrame_1.jpeg)
 
-- Challenge: One of the biggest challenges  during  development was ensuring that words in tiles do not repeat after a user is successfully assigned to a group.
-It was very important to fix this issue  because repeating words can confuse players and disrupt the gaming experience.
+![Original wireframe 2](WireFrames/wireFrame_2.jpeg)
 
-- Solution: To resolve this issue, I implemented a filtering mechanism within the assignTileContent function.
-This mechanism first collects all unmatched words from the connection_words array.
-Before these words are assigned to  tiles, the function filters out all words that have already been matched and are present in the matchedWords array.
-This approach ensures that only new words that don't match on the tiles appear, keeping the game challenging and exciting.
+![Original wireframe 3](WireFrames/wireFrame_3.jpeg)
 
-Creating a dynamic banner after user matches the words 
+</details>
 
-- Challenge: Another challenge is to design and implement a feature  that displays a banner that replaces a row on the game board when the user  matches a group of words. To improve the user experience, banners needed to be informative, display categories and appropriate words, and be visually appealing.
+## Credits and project note
 
-- Solution: The solution was to create a displayBanner function that dynamically generates a banner element when called.
-This function takes the category, difficulty level, target line, and  words to display as arguments.
- Depending on the difficulty  of the matched group, the  background color of the banner changes, giving players instant visual feedback.
-The function then replaces the contents of the specified row with this newly created banner.
-To add an fine touch, CSS animations (Banner Appear Animation) are applied to smooth the transition of the banner  into view.
+This is a personal, non-commercial, educational project inspired by word-connection games. It is not affiliated with, endorsed by, or maintained by The New York Times Company.
 
+The original background artwork came from [Freepik](https://www.freepik.com/free-vector/linear-flat-abstract-lines-pattern_13819726.htm). The current interface uses a CSS background.
 
-Although I managed to create everything on my wireframe,I know that there's room for improvement, like adding another puzzle or making it mobile-friendly.
-
-
-## Bugs
-
-Main Menu button does not work
-Also user can't exit out of the message pop of the end of the Game
-
-## Disclaimer
-
-This is a personal, non-commercial, educational project that builds on the Word Connection Games in The New York Times (NYT). This project is neither endorsed by, maintained by, authorized by, or affiliated with The New York Times Company or by any of its affiliates.
-
-All code is original and created solely by the project’s author(s). No copyright infringement is implied through the use of third-party trademarks. This project is for educational purposes and is not intended for commercial use. It is released as open-source code.
-
-Note: the underlying concept and game design itself is the intellectual property of whoever originally created it, and any repeat of the concept is merely provided to showcase coding ability and is not meant to infringe.
-
-For any concerns or takedown requests, please contact me Brandon.Alvarado9991@gmail.com
-
-
-
-
+For questions about the project, contact [Brandon Alvarado](mailto:Brandon.Alvarado9991@gmail.com).

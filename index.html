@@ -2,46 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f7f5ed">
     <title>Connection Game</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://kit.fontawesome.com/ce45817bc3.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="game-base">
-        <header>
-            <h1>Connection Game</h1>
+        <header class="game-header">
+            <div class="heading-row">
+                <div class="brand">
+                    <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                    <div>
+                        <p id="puzzle-number" class="eyebrow">Hard · Puzzle 1 of 8</p>
+                        <h1>Connection Game</h1>
+                    </div>
+                </div>
+                <div id="score-display" style="display: none;"><span id="score">Score: 0</span></div>
+            </div>
         </header>
+
         <div id="menu">
-            <p>Group words that share a common thread.</p>
-            <button id="play-button">Play</button>
-        </div>
-        <div id="score-display" style="display: none;"><span id="score">Score: 0</span></div>
-        <div id="message-box" style="display: none;"></div>
-        <div id="message-box2" style="display: none;">
-            <div class="message-content-box">
-                <span class="close-btn" onclick="closeMessageBox2()">&times;</span>
+            <div id="menu-box" class="home-hero">
+                <div class="hero-content">
+                    <p class="hero-kicker">1,000+ words to connect</p>
+                    <h2>Think you can<br><span>connect them?</span></h2>
+                    <p id="hiding-this">Find four secret groups hiding in sixteen words. Solve the board to unlock the next puzzle.</p>
+                    <fieldset class="difficulty-picker">
+                        <legend>Pick your challenge</legend>
+                        <div class="difficulty-options">
+                            <label><input type="radio" name="difficulty" value="easy"><span>Easy</span></label>
+                            <label><input type="radio" name="difficulty" value="medium"><span>Medium</span></label>
+                            <label><input type="radio" name="difficulty" value="hard" checked><span>Hard</span></label>
+                            <label><input type="radio" name="difficulty" value="expert"><span>Expert</span></label>
+                        </div>
+                    </fieldset>
+                    <button id="play-button" type="button">Let's play <span aria-hidden="true">&rarr;</span></button>
+                    <p class="menu-note">16 words <span>&middot;</span> 4 groups <span>&middot;</span> 4 chances</p>
+                </div>
+                <div class="hero-preview" aria-hidden="true">
+                    <div class="preview-board">
+                        <div class="preview-solved"><strong>In the night sky</strong><span>MOON &middot; STAR &middot; COMET &middot; PLANET</span></div>
+                        <span class="preview-tile">TEAL</span><span class="preview-tile preview-selected">BASS</span><span class="preview-tile">CAKE</span><span class="preview-tile">GOLD</span>
+                        <span class="preview-tile">TART</span><span class="preview-tile">FLUTE</span><span class="preview-tile">PINK</span><span class="preview-tile">HARP</span>
+                        <span class="preview-tile">PIE</span><span class="preview-tile">BLUE</span><span class="preview-tile preview-selected">DRUM</span><span class="preview-tile">DONUT</span>
+                    </div>
+                    <p class="preview-caption">Spot the link. Feel the click.</p>
+                </div>
             </div>
         </div>
-        <main id="game-board" class="no-select" style="display: none;">
+
+        <div id="message-box" role="status" aria-live="polite" style="display: none;"></div>
+
+        <div id="end-game-backdrop">
+            <div id="end-game-message-box" role="dialog" aria-modal="true" aria-labelledby="end-game-message">
+                <button id="close-end-game-button" class="close-btn" type="button" aria-label="Close results">&times;</button>
+                <p id="end-game-message"></p>
+                <div class="result-actions">
+                    <button id="next-puzzle-button" type="button">Play Again</button>
+                    <button id="main-menu-button" type="button">Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="message-box2" style="display: none;">
+            <div class="message-content-box" role="dialog" aria-modal="true" aria-label="How to play Connections">
+                <button id="close-help-button" class="close-btn" type="button" aria-label="Close help">&times;</button>
+                <div class="message-content"></div>
+            </div>
+        </div>
+
+        <main id="game-board" class="no-select" aria-label="Word puzzle" style="display: none;">
             <div class="row" id="row-0"></div>
             <div class="row" id="row-1"></div>
             <div class="row" id="row-2"></div>
             <div class="row" id="row-3"></div>
         </main>
-        <footer>
-            <div id="tries-left" class="tries-container"></div>
-            <div class="groups-button">
-                <button id="shuffle-button">Shuffle</button>
-                <button id="deselect-button">Deselect All</button>
-                <button id="submit-button">Submit</button>
+
+        <footer class="game-footer">
+            <div class="game-status">
+                <div id="tries-left" class="tries-container"></div>
+                <button id="help-button" type="button" aria-label="How to play">How to play</button>
             </div>
-            <button id="help-button" class="fa-regular fa-circle-question"></button>
+            <div id="game-controls" class="groups-button">
+                <button id="shuffle-button" type="button">Shuffle</button>
+                <button id="deselect-button" type="button">Deselect All</button>
+                <button id="submit-button" type="button">Submit</button>
+            </div>
+            <div id="end-game-controls" class="groups-button" style="display: none;">
+                <button id="replay-button" type="button">Play Again</button>
+                <button id="return-to-menu-button" type="button">Main Menu</button>
+            </div>
         </footer>
-        <div id="end-game-backdrop">
-            <div id="end-game-message-box"></div>
-        </div>
     </div>
+    <script src="puzzles.js"></script>
+    <script src="puzzles-medium.js"></script>
+    <script src="puzzles-hard.js"></script>
     <script src="connections.js"></script>
 </body>
 </html>

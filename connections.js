@@ -1,374 +1,429 @@
 document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
     const scoreBoard = document.getElementById('score');
-    const playButton = document.getElementById('play-button');
+    const submitButton = document.getElementById('submit-button');
+    const helpBackdrop = document.getElementById('message-box2');
+    const endGameBackdrop = document.getElementById('end-game-backdrop');
     let score = 0;
     let activeTiles = [];
     let matchedWords = [];
     let nextRowToReplace = 0;
-    let almostMatchedGroup = null;
     let triesLeft = 4;
+    let gameStarted = false;
+    let gameOver = false;
+    let gameWon = false;
+    let messageTimeout;
 
-    function showMessageBox(message) {
-        const messageBox = document.getElementById('message-box');
-        messageBox.innerText = message;
-        messageBox.style.display = 'block';
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 4000);
+    const puzzleLevels = {
+        easy: window.CONNECTION_PUZZLES,
+        medium: window.CONNECTION_MEDIUM_PUZZLES,
+        hard: window.CONNECTION_CHALLENGE_PUZZLES.hard,
+        expert: window.CONNECTION_CHALLENGE_PUZZLES.expert,
+    };
+    const difficultyLabels = { easy: 'Easy', medium: 'Medium', hard: 'Hard', expert: 'Expert' };
+    let selectedDifficulty = loadSelectedDifficulty();
+    let puzzles = puzzleLevels[selectedDifficulty];
+    const savedPuzzleIndex = loadCurrentPuzzleIndex();
+    let currentPuzzleIndex = savedPuzzleIndex ?? 0;
+    let lastPlayedPuzzleIndex = savedPuzzleIndex;
+    const lastPlayedByDifficulty = {};
+    let connection_words = puzzles[currentPuzzleIndex];
+
+    function loadSelectedDifficulty() {
+        try {
+            const savedDifficulty = window.localStorage.getItem('connection-game:difficulty');
+            if (Object.hasOwn(puzzleLevels, savedDifficulty)) return savedDifficulty;
+        } catch {
+            // The difficulty picker also works without browser storage.
+        }
+        return 'hard';
     }
 
-    function showMessageBox2() {
-        const messageBox = document.getElementById('message-box2');
-        const messageContentBox = messageBox.querySelector('.message-content-box');
-        const helpContentHTML = `
+    function selectDifficulty(difficulty) {
+        if (gameStarted || !Object.hasOwn(puzzleLevels, difficulty)) return;
+        selectedDifficulty = difficulty;
+        puzzles = puzzleLevels[difficulty];
+        const savedIndex = Object.hasOwn(lastPlayedByDifficulty, difficulty)
+            ? lastPlayedByDifficulty[difficulty]
+            : loadCurrentPuzzleIndex();
+        currentPuzzleIndex = savedIndex ?? 0;
+        lastPlayedPuzzleIndex = savedIndex;
+        try {
+            window.localStorage.setItem('connection-game:difficulty', difficulty);
+        } catch {
+            // Keep the selected level for this session when storage is unavailable.
+        }
+        resetGameState();
+    }
+
+    function puzzleStorageKey() {
+        return `connection-game:puzzle-index:${selectedDifficulty}`;
+    }
+
+    function loadCurrentPuzzleIndex() {
+        try {
+            const savedValue = window.localStorage.getItem(puzzleStorageKey());
+            if (savedValue === null || savedValue.trim() === '') return null;
+            const savedIndex = Number(savedValue);
+            if (Number.isInteger(savedIndex) && savedIndex >= 0 && savedIndex < puzzles.length) return savedIndex;
+        } catch {
+            // The game still works when the browser blocks storage.
+        }
+        return null;
+    }
+
+    function saveCurrentPuzzleIndex() {
+        try {
+            window.localStorage.setItem(puzzleStorageKey(), String(currentPuzzleIndex));
+        } catch {
+            // Progress remains available for this session if storage is unavailable.
+        }
+    }
+
+    function clearMessageBoxes() {
+        clearTimeout(messageTimeout);
+        document.getElementById('message-box').style.display = 'none';
+    }
+
+    function showMessageBox(message) {
+        clearMessageBoxes();
+        const messageBox = document.getElementById('message-box');
+        messageBox.textContent = message;
+        messageBox.style.display = 'block';
+        messageTimeout = setTimeout(clearMessageBoxes, 4000);
+    }
+
+    function showHelpButton() {
+        clearMessageBoxes();
+        helpBackdrop.querySelector('.message-content').innerHTML = `
             <h2>How to play Connections</h2>
             <p>Find groups of four items that share something in common.</p>
             <ul>
                 <li>Select four items and tap 'Submit' to check if your guess is correct.</li>
                 <li>Find the groups without making 4 mistakes!</li>
+                <li>Complete a puzzle to move on to a new set of words.</li>
+                <li>Choose Easy, Medium, Hard, or Expert before playing. Harder puzzles use double meanings, phrases, and wordplay.</li>
             </ul>
-            <h3>Group Examples:</h3>
-            <p id="examples">Bank: Coins, Teller, Vault, Checks</p>
-            <p id="examples">Tom ___: Cruise, Hanks, Bradley, Holland</p>
-            <p id="examples">Each group is always going to be more detailed than "5-LETTER WORDS," "NAMES" or "VERBS."</p>
-            <p id="examples">Each puzzle has exactly one solution. Watch out for words that seem to belong to multiple categories!</p>
-            <p id="examples">Each group of words you match will show you the difficulty as you solve:</p>
+            <h3>Group difficulty:</h3>
             <div class="color-explanation">
-                <span class="color-box easy"></span> Easy
-                <span class="color-box moderate"></span> Moderate
-                <span class="color-box hard"></span> Hard
-                <span class="color-box tricky"></span> Tricky
+                <span class="difficulty-item"><span class="color-box easy"></span> Easy</span>
+                <span class="difficulty-item"><span class="color-box moderate"></span> Moderate</span>
+                <span class="difficulty-item"><span class="color-box hard"></span> Hard</span>
+                <span class="difficulty-item"><span class="color-box tricky"></span> Tricky</span>
             </div>
-            <p id="examples">Have general feedback? <a href="#">Tell us!</a></p>
         `;
-        messageContentBox.innerHTML = helpContentHTML;
-        messageBox.style.display = 'flex';
-        setTimeout(() => {
-            messageBox.style.opacity = 1;
-            messageContentBox.style.opacity = 1;
-            messageContentBox.style.transform = 'translateY(0)';
-        }, 10);
+        helpBackdrop.style.display = 'flex';
+        document.getElementById('close-help-button').focus();
     }
 
-    function showEndGameMessageBox(isSuccess) {
-        const backdrop = document.getElementById('end-game-backdrop');
-        const messageBox = document.getElementById('end-game-message-box');
-        messageBox.innerHTML = `
-            <p>${isSuccess ? 'Good job! You matched all words.' : 'Better luck next time!'}</p>
-            ${isSuccess ? '<button onclick="nextPuzzle()">Next Puzzle</button>' : ''}
-            <button onclick="closeEndGameMessageBox()">Main Menu</button>
-        `;
-        backdrop.style.display = 'flex';
+    function closeHelpMessageBox() {
+        helpBackdrop.style.display = 'none';
+        document.getElementById('help-button').focus();
     }
 
     function closeEndGameMessageBox() {
-        const backdrop = document.getElementById('end-game-backdrop');
-        backdrop.style.display = 'none';
-        restartGame();
+        endGameBackdrop.style.display = 'none';
+        document.getElementById('replay-button').focus();
     }
 
-    window.closeEndGameMessageBox = closeEndGameMessageBox;
-
-    function restartGame() {
-        score = 0;
-        activeTiles = [];
-        matchedWords = [];
-        nextRowToReplace = 0;
-        triesLeft = 4;
-        document.getElementById('menu').style.display = 'flex';
-        document.getElementById('score-display').style.display = 'none';
-        document.getElementById('game-board').style.display = 'none';
-        document.getElementById('shuffle-button').style.display = 'none';
-        document.getElementById('deselect-button').style.display = 'none';
-        document.getElementById('submit-button').style.display = 'none';
-        document.getElementById('help-button').style.display = 'none';
-        playButton.style.display = 'block';
-        playButton.style.animation = '';
-        document.getElementById('tries-left').innerHTML = '';
-        updateScore();
-    }
-
-    function closeMessageBox() {
-        const messageBox = document.getElementById('message-box2');
-        const messageContentBox = messageBox.querySelector('.message-content-box');
-        messageBox.style.opacity = 0;
-        messageContentBox.style.opacity = 0;
-        messageContentBox.style.transform = 'translateY(20%)';
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 500);
-    }
-
-    function hideAlmostMatchedMessageBox() {
-        const messageBox = document.getElementById('message-box');
-        messageBox.style.display = 'none';
-    }
-
-    function deselectTiles() {
-        document.querySelectorAll('.tile--active').forEach(tile => {
-            tile.classList.remove('tile--active');
+    function showEndGameMessageBox(isSuccess) {
+        document.getElementById('end-game-message').textContent = isSuccess
+            ? 'Good job! You matched all words.'
+            : 'Better luck next time!';
+        const nextButtonLabel = isSuccess ? 'Next Puzzle' : 'Try Again';
+        ['next-puzzle-button', 'replay-button'].forEach(id => {
+            document.getElementById(id).textContent = nextButtonLabel;
         });
-        activeTiles.length = 0;
-        document.getElementById('submit-button').disabled = activeTiles.length !== 4;
-        hideAlmostMatchedMessageBox();
+        endGameBackdrop.style.display = 'flex';
+        document.getElementById('next-puzzle-button').focus();
     }
 
-    function shuffleTiles() {
-        const tiles = Array.from(document.querySelectorAll('.tile'));
-        let contents = tiles.map(tile => tile.getAttribute('data-content'));
-        const numberOfActiveTiles = activeTiles.length;
-        for (let i = contents.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            [contents[i], contents[j]] = [contents[j], contents[i]];
-        }
-        tiles.forEach((tile, index) => {
-            tile.innerText = contents[index];
-            tile.setAttribute('data-content', contents[index]);
-        });
-        tiles.forEach(tile => tile.classList.remove('tile--active'));
-        activeTiles = [];
-        let indicesToHighlight = new Set();
-        while (indicesToHighlight.size < numberOfActiveTiles) {
-            let randomIndex = Math.floor(Math.random() * tiles.length);
-            indicesToHighlight.add(randomIndex);
-        }
-        indicesToHighlight.forEach(index => {
-            tiles[index].classList.add('tile--active');
-            activeTiles.push(index);
-        });
-        document.getElementById('submit-button').disabled = activeTiles.length !== 4;
+    function updatePuzzleDisplay() {
+        const puzzleNumber = document.getElementById('puzzle-number');
+        if (puzzleNumber) puzzleNumber.textContent = `${difficultyLabels[selectedDifficulty]} · Puzzle ${currentPuzzleIndex + 1} of ${puzzles.length}`;
     }
 
-    function mistakesLeft() {
-        triesLeft -= 1;
-        updateTriesDisplay();
-        if (triesLeft === 0) {
-            solveWords();
+    function startNextPuzzle() {
+        if (!gameOver) return;
+        if (gameWon) {
+            currentPuzzleIndex = (currentPuzzleIndex + 1) % puzzles.length;
+            saveCurrentPuzzleIndex();
         }
+        initGame();
     }
 
-    function updateTriesDisplay() {
-        const triesDisplay = document.getElementById('tries-left');
-        let displayContent = '<span class="mistakes-text">Mistakes left:</span> ';
-        for (let i = 0; i < triesLeft; i++) {
-            displayContent += '<i class="fa-solid fa-skull-crossbones skull-icon"></i>';
+    function startRandomPuzzle() {
+        if (gameStarted) return;
+        if (lastPlayedPuzzleIndex !== null && puzzles.length > 1) {
+            // Pick from every index except the last puzzle without retrying a random draw.
+            const randomIndex = Math.floor(Math.random() * (puzzles.length - 1));
+            currentPuzzleIndex = randomIndex >= lastPlayedPuzzleIndex ? randomIndex + 1 : randomIndex;
+        } else {
+            currentPuzzleIndex = Math.floor(Math.random() * puzzles.length);
         }
-        triesDisplay.innerHTML = displayContent;
+        saveCurrentPuzzleIndex();
+        initGame();
     }
 
     function createTiles() {
         for (let i = 0; i < 4; i++) {
-            let row = document.getElementById(`row-${i}`);
-            row.innerHTML = '';
+            const row = document.getElementById(`row-${i}`);
+            row.replaceChildren();
             for (let j = 0; j < 4; j++) {
-                let tileIndex = i * 4 + j;
-                let tile = document.createElement('div');
+                const tile = document.createElement('button');
+                tile.type = 'button';
                 tile.className = 'tile row-tile';
-                tile.setAttribute('data-index', tileIndex);
+                tile.setAttribute('data-index', i * 4 + j);
+                tile.setAttribute('aria-pressed', 'false');
                 row.appendChild(tile);
             }
         }
     }
 
-    const connection_words = [
-        {
-            category: "Bit of Magic",
-            words: ["CHARM", "CURSE", "HEX", "SPELL"],
-            difficulty: 1,
-        },
-        {
-            category: "Found Around A Fireplace",
-            words: ["FLUE", "GRATE", "LOG", "POKER"],
-            difficulty: 2,
-        },
-        {
-            category: "Things Seen At A Casino",
-            words: ["CARDS", "CHIPS", "DICE", "SLOTS"],
-            difficulty: 3,
-        },
-        {
-            category: "Ways To Prepare Cheese",
-            words: ["CRUMBLE", "MELT", "SHRED", "SLICE"],
-            difficulty: 4,
-        },
-    ];
-
-    function getDifficultyColor(difficulty) {
-        switch (difficulty) {
-            case 1: return 'color-easy';
-            case 2: return 'color-normal';
-            case 3: return 'color-hard';
-            case 4: return 'color-tricky';
-            default: return 'color-default';
-        }
+    function deselectTiles() {
+        gameBoard.querySelectorAll('.tile--active').forEach(tile => {
+            tile.classList.remove('tile--active');
+            tile.setAttribute('aria-pressed', 'false');
+        });
+        activeTiles = [];
+        submitButton.disabled = true;
     }
 
-    function assignTileContent() {
-        let tileContents = [];
-        connection_words.forEach(group => {
-            const unmatchedWords = group.words.filter(word => !matchedWords.includes(word));
-            tileContents = tileContents.concat(unmatchedWords);
-        });
-        tileContents.sort(() => Math.random() - 0.5);
-        const tiles = document.querySelectorAll('.tile');
+    function shuffle(contents) {
+        for (let i = contents.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [contents[i], contents[j]] = [contents[j], contents[i]];
+        }
+        return contents;
+    }
+
+    function shuffleTiles() {
+        if (!gameStarted || gameOver) return;
+        deselectTiles();
+        const tiles = Array.from(gameBoard.querySelectorAll('.tile'));
+        const contents = shuffle(tiles.map(tile => tile.getAttribute('data-content')));
         tiles.forEach((tile, index) => {
-            if (index < tileContents.length) {
-                tile.innerText = tileContents[index];
-                tile.setAttribute('data-content', tileContents[index]);
-            } else {
-                tile.innerText = '';
-                tile.removeAttribute('data-content');
-            }
+            tile.textContent = contents[index];
+            tile.setAttribute('data-content', contents[index]);
         });
+    }
+
+    function resetGameState() {
+        score = 0;
+        activeTiles = [];
+        matchedWords = [];
+        nextRowToReplace = 0;
+        triesLeft = 4;
+        gameOver = false;
+        gameWon = false;
+        connection_words = puzzles[currentPuzzleIndex];
+        submitButton.disabled = true;
+        updatePuzzleDisplay();
+        updateScoreDisplay();
+        updateTriesDisplay();
+        clearMessageBoxes();
     }
 
     function initGame() {
+        // Clear solved words before assigning content for the next round.
+        resetGameState();
         createTiles();
         assignTileContent();
-        score = 0;
-        updateScore();
-        activeTiles = [];
-        triesLeft = 4;
-        updateTriesDisplay();
-        document.getElementById('game-board').style.display = 'flex';
-        document.getElementById('score-display').style.display = 'block';
+        gameStarted = true;
+        lastPlayedPuzzleIndex = currentPuzzleIndex;
+        lastPlayedByDifficulty[selectedDifficulty] = currentPuzzleIndex;
+        document.getElementById('game-base').classList.add('is-playing');
+        helpBackdrop.style.display = 'none';
+        endGameBackdrop.style.display = 'none';
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('hiding-this').style.display = 'none';
+        document.getElementById('end-game-controls').style.display = 'none';
+        document.getElementById('game-controls').style.display = 'block';
+        document.getElementById('tries-left').style.display = 'flex';
+        ['shuffle-button', 'deselect-button', 'submit-button', 'help-button', 'score-display'].forEach(id => {
+            document.getElementById(id).style.display = 'inline-block';
+        });
+        gameBoard.style.display = 'flex';
+        gameBoard.classList.add('fade-in-animation');
+        gameBoard.querySelector('.tile').focus();
+    }
+
+    function showMainMenu(focusPlayButton = true) {
+        gameStarted = false;
+        document.getElementById('game-base').classList.remove('is-playing');
+        resetGameState();
+        helpBackdrop.style.display = 'none';
+        endGameBackdrop.style.display = 'none';
+        gameBoard.style.display = 'none';
+        gameBoard.classList.remove('fade-in-animation');
+        gameBoard.querySelectorAll('.row').forEach(row => row.replaceChildren());
+        ['game-controls', 'end-game-controls', 'tries-left', 'help-button', 'score-display'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+        document.getElementById('menu').style.display = 'block';
+        document.getElementById('hiding-this').style.display = 'block';
+        if (focusPlayButton) document.getElementById('play-button').focus();
+    }
+
+    function finishGame(isSuccess) {
+        gameOver = true;
+        gameWon = isSuccess;
+        deselectTiles();
+        clearMessageBoxes();
+        document.getElementById('game-controls').style.display = 'none';
+        document.getElementById('end-game-controls').style.display = 'block';
+        showEndGameMessageBox(isSuccess);
     }
 
     function checkForMatch() {
-        const selectedTiles = activeTiles.map(tileIndex =>
-            document.querySelector(`.tile[data-index="${tileIndex}"]`));
-        const matchedGroup = connection_words.find(group =>
-            selectedTiles.every(tile => group.words.includes(tile.getAttribute('data-content')))
+        if (!gameStarted || gameOver || activeTiles.length !== 4) return;
+        const selectedWords = activeTiles.map(tileIndex =>
+            gameBoard.querySelector(`.tile[data-index="${tileIndex}"]`).getAttribute('data-content')
         );
-        if (matchedGroup && selectedTiles.length === matchedGroup.words.length) {
+        const matchedGroup = connection_words.find(group =>
+            selectedWords.every(word => group.words.includes(word))
+        );
+        if (matchedGroup) {
             score += matchedGroup.difficulty * 10;
-            updateScore();
+            updateScoreDisplay();
             matchedWords.push(...matchedGroup.words);
-            if (nextRowToReplace < 4) {
-                const rowToReplace = document.getElementById(`row-${nextRowToReplace}`);
-                displayBanner(matchedGroup.category, matchedGroup.difficulty, rowToReplace, matchedGroup.words);
-                nextRowToReplace++;
-            }
-            resetTiles();
+            deselectTiles();
+            const rowToReplace = document.getElementById(`row-${nextRowToReplace}`);
+            displayBanner(matchedGroup.category, matchedGroup.difficulty, rowToReplace, matchedGroup.words, matchedGroup.explanation);
+            nextRowToReplace++;
             assignTileContent();
-            almostMatchedGroup = null;
-            activeTiles.length = 0;
-            const allMatched = connection_words.every(group =>
-                group.words.every(word => matchedWords.includes(word))
-            );
-            if (allMatched) {
-                showEndGameMessageBox(true);
-            }
+            clearMessageBoxes();
+            if (matchedWords.length === connection_words.length * 4) finishGame(true);
         } else {
-            mistakesLeft();
-            if (triesLeft <= 0) {
-                showMessageBox('Better luck next time!');
+            deselectTiles();
+            triesLeft--;
+            updateTriesDisplay();
+            if (triesLeft === 0) {
                 solveWords();
-                showEndGameMessageBox(false);
+                finishGame(false);
             } else {
-                almostMatchedGroup = connection_words.find(group =>
-                    selectedTiles.filter(tile => group.words.includes(tile.getAttribute('data-content'))).length === 3
+                const isOneAway = connection_words.some(group =>
+                    selectedWords.filter(word => group.words.includes(word)).length === 3
                 );
-                if (almostMatchedGroup && selectedTiles.length === 4) {
-                    showMessageBox('You are missing one!');
-                    return;
-                } else {
-                    showMessageBox('Try again, those words do not match.');
-                }
+                showMessageBox(isOneAway ? 'One away! Try a different combination.' : 'Try again, those words do not match.');
             }
         }
-        document.getElementById('submit-button').disabled = true;
+        submitButton.disabled = true;
     }
 
-    function displayBanner(category, difficulty, rowToReplace, wordsToDisplay) {
-        const bannerColor = getDifficultyColor(difficulty);
-        const banner = document.createElement('div');
-        banner.className = `answer-banner ${bannerColor}`;
-        banner.innerHTML = `<p>${category}<br>${wordsToDisplay.join(', ')}</p>`;
-        rowToReplace.innerHTML = '';
-        rowToReplace.appendChild(banner);
-        banner.classList.add('banner-appear-animation');
-    }
-
-    function resetTiles() {
-        document.querySelectorAll('.tile--active').forEach(tile => {
-            tile.classList.remove('tile--active');
-            tile.classList.remove('tile--matched');
+    function assignTileContent() {
+        const tileContents = shuffle(connection_words.flatMap(group =>
+            group.words.filter(word => !matchedWords.includes(word))
+        ));
+        gameBoard.querySelectorAll('.tile').forEach((tile, index) => {
+            tile.textContent = tileContents[index];
+            tile.setAttribute('data-content', tileContents[index]);
         });
     }
 
     function handleTileClick(event) {
-        hideAlmostMatchedMessageBox();
-        const clickedTile = event.target;
-        if (!clickedTile.classList.contains('tile')) {
-            return;
-        }
+        if (!gameStarted || gameOver) return;
+        const clickedTile = event.target.closest('.tile');
+        if (!clickedTile || !gameBoard.contains(clickedTile)) return;
+        const tileIndex = Number(clickedTile.getAttribute('data-index'));
         const isTileActive = clickedTile.classList.contains('tile--active');
-        const tileIndex = parseInt(clickedTile.getAttribute('data-index'), 10);
         if (isTileActive) {
             clickedTile.classList.remove('tile--active');
+            clickedTile.setAttribute('aria-pressed', 'false');
             activeTiles = activeTiles.filter(index => index !== tileIndex);
-        } else if (!isTileActive && activeTiles.length < 4) {
+        } else if (activeTiles.length < 4) {
             clickedTile.classList.add('tile--active');
+            clickedTile.setAttribute('aria-pressed', 'true');
             activeTiles.push(tileIndex);
+        } else {
+            return;
         }
-        document.getElementById('submit-button').disabled = activeTiles.length !== 4;
-        event.stopPropagation();
+        submitButton.disabled = activeTiles.length !== 4;
     }
 
-    function updateScore() {
-        scoreBoard.innerText = `Score: ${score}`;
+    function updateTriesDisplay() {
+        const triesDisplay = document.getElementById('tries-left');
+        triesDisplay.setAttribute('aria-label', `${triesLeft} mistakes left`);
+        triesDisplay.innerHTML = '<span class="mistakes-text">Mistakes left:</span>'
+            + '<span class="try-circle" aria-hidden="true"></span>'.repeat(triesLeft);
     }
 
-    playButton.addEventListener('click', function() {
-        this.style.animation = 'slideOut 0.9s forwards';
-        setTimeout(() => {
-            this.style.display = 'none';
-            document.getElementById('menu').style.display = 'none';
-            const gameBoard = document.getElementById('game-board');
-            gameBoard.style.display = 'flex';
-            gameBoard.classList.add('fade-in-animation');
-            setTimeout(() => {
-                document.getElementById('shuffle-button').style.display = 'inline-block';
-                document.getElementById('deselect-button').style.display = 'inline-block';
-                document.getElementById('submit-button').style.display = 'inline-block';
-                document.getElementById('help-button').style.display = 'inline-block';
-                document.getElementById('score-display').style.display = 'inline-block';
-            }, 410);
-            initGame();
-        }, 500);
-    });
+    function getDifficultyColor(difficulty) {
+        return ['color-easy', 'color-normal', 'color-hard', 'color-tricky'][difficulty - 1];
+    }
+
+    function displayBanner(category, difficulty, rowToReplace, wordsToDisplay, explanation) {
+        const banner = document.createElement('div');
+        banner.className = `answer-banner ${getDifficultyColor(difficulty)} banner-appear-animation`;
+        banner.innerHTML = `<p class="answer-category">${category}</p><p class="answer-words">${wordsToDisplay.join(', ')}</p>`;
+        if (explanation) {
+            const detail = document.createElement('p');
+            detail.className = 'answer-explanation';
+            detail.textContent = explanation;
+            banner.appendChild(detail);
+        }
+        rowToReplace.replaceChildren(banner);
+    }
 
     function solveWords() {
         connection_words.forEach(group => {
             if (!group.words.every(word => matchedWords.includes(word))) {
-                if (nextRowToReplace < 4) {
-                    const rowToReplace = document.getElementById(`row-${nextRowToReplace}`);
-                    displayBanner(group.category, group.difficulty, rowToReplace, group.words);
-                    nextRowToReplace++;
-                }
+                const rowToReplace = document.getElementById(`row-${nextRowToReplace}`);
+                displayBanner(group.category, group.difficulty, rowToReplace, group.words, group.explanation);
+                nextRowToReplace++;
                 matchedWords.push(...group.words);
             }
         });
-        document.getElementById('submit-button').disabled = true;
     }
 
-    document.getElementById('submit-button').disabled = true;
-    document.getElementById('submit-button').addEventListener('click', function() {
-        if (activeTiles.length > 0) {
-            checkForMatch();
-        }
-    });
+    function updateScoreDisplay() {
+        scoreBoard.textContent = `Score: ${score}`;
+    }
 
+    document.getElementById('play-button').addEventListener('click', startRandomPuzzle);
+    document.querySelectorAll('input[name="difficulty"]').forEach(input => {
+        input.checked = input.value === selectedDifficulty;
+        input.addEventListener('change', () => {
+            if (input.checked) selectDifficulty(input.value);
+        });
+    });
+    document.getElementById('next-puzzle-button').addEventListener('click', startNextPuzzle);
+    document.getElementById('replay-button').addEventListener('click', startNextPuzzle);
+    document.getElementById('main-menu-button').addEventListener('click', () => showMainMenu());
+    document.getElementById('return-to-menu-button').addEventListener('click', () => showMainMenu());
+    document.getElementById('close-end-game-button').addEventListener('click', closeEndGameMessageBox);
+    document.getElementById('close-help-button').addEventListener('click', closeHelpMessageBox);
+    submitButton.addEventListener('click', checkForMatch);
     document.getElementById('deselect-button').addEventListener('click', deselectTiles);
     document.getElementById('shuffle-button').addEventListener('click', shuffleTiles);
-    document.getElementById('help-button').addEventListener('click', function() {
-        showMessageBox2();
+    document.getElementById('help-button').addEventListener('click', showHelpButton);
+    document.getElementById('message-box').addEventListener('click', clearMessageBoxes);
+    helpBackdrop.addEventListener('click', event => {
+        if (event.target === helpBackdrop) closeHelpMessageBox();
     });
-    document.getElementById('message-box2').addEventListener('click', closeMessageBox);
-    document.getElementById('message-box').addEventListener('click', function() {
-        this.style.display = 'none';
+    endGameBackdrop.addEventListener('click', event => {
+        if (event.target === endGameBackdrop) closeEndGameMessageBox();
+    });
+    document.addEventListener('keydown', event => {
+        const visibleBackdrop = [helpBackdrop, endGameBackdrop].find(backdrop => backdrop.style.display === 'flex');
+        if (!visibleBackdrop) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            if (visibleBackdrop === helpBackdrop) closeHelpMessageBox();
+            else closeEndGameMessageBox();
+        } else if (event.key === 'Tab') {
+            const buttons = visibleBackdrop.querySelectorAll('button');
+            const firstButton = buttons[0];
+            const lastButton = buttons[buttons.length - 1];
+            if (event.shiftKey && document.activeElement === firstButton) {
+                event.preventDefault();
+                lastButton.focus();
+            } else if (!event.shiftKey && document.activeElement === lastButton) {
+                event.preventDefault();
+                firstButton.focus();
+            }
+        }
     });
     gameBoard.addEventListener('click', handleTileClick);
+    showMainMenu(false);
 });
