@@ -92,6 +92,4 @@ The checks validate the word count, distinct boards, complete four-word groups, 
 
 This is a personal, non-commercial, educational project inspired by word-connection games. It is not affiliated with, endorsed by, or maintained by The New York Times Company.
 
-The original background artwork came from [Freepik](https://www.freepik.com/free-vector/linear-flat-abstract-lines-pattern_13819726.htm). The current interface uses a CSS background.
-
 For questions about the project, contact [Brandon Alvarado](mailto:Brandon.Alvarado9991@gmail.com).
